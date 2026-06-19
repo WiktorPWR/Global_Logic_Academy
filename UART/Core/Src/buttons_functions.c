@@ -1,8 +1,9 @@
 #include "buttons_functions.h"
+#include "leds.h"
 
 extern TIM_HandleTypeDef htim3;
 
-volatile Button_pressed button_pressed = {0, NULL, 0};
+volatile Button_pressed button_pressed = {0, NULL};
 
 
 /**
@@ -65,3 +66,34 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
    HAL_TIM_Base_Start_IT(&htim3);
 }
 
+
+void button_pressede_functionality(uint16_t GPIO_Pin, GPIO_TypeDef* GPIO_Port)
+{
+    switch (GPIO_Pin) {
+        case SWT1_Pin:
+            toggle_led_state(LD3_Pin, LD3_GPIO_Port);
+            HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+            break;
+        case SWT2_Pin:
+            toggle_all_leds();
+            HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+            HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
+            HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
+            HAL_GPIO_TogglePin(LD6_GPIO_Port, LD6_Pin);
+            break;
+        case SWT3_Pin:
+            toggle_led_state(LD4_Pin, LD4_GPIO_Port);
+            HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
+            break;
+        case SWT4_Pin:
+            toggle_led_state(LD5_Pin, LD5_GPIO_Port);
+            HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
+            break;
+        case SWT5_Pin:
+            toggle_led_state(LD6_Pin, LD6_GPIO_Port);
+            HAL_GPIO_TogglePin(LD6_GPIO_Port, LD6_Pin);
+            break;
+        default:
+            break;
+    }
+}
