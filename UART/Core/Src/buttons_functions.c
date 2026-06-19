@@ -1,4 +1,5 @@
 #include "buttons_functions.h"
+#include "leds.h"
 
 extern TIM_HandleTypeDef htim3;
 
@@ -65,3 +66,31 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
    HAL_TIM_Base_Start_IT(&htim3);
 }
 
+
+void button_pressed_functionality(uint16_t GPIO_Pin)
+{
+    switch (GPIO_Pin) {
+        case SWT1_Pin:
+            toggle_led_state(LD3_Pin, LD3_GPIO_Port);   
+            break;
+        case SWT2_Pin:
+            toggle_all_leds();
+            break;
+        case SWT3_Pin:
+            toggle_led_state(LD4_Pin, LD4_GPIO_Port);
+            break;
+        case SWT4_Pin:
+            toggle_led_state(LD5_Pin, LD5_GPIO_Port);
+            break;
+        case SWT5_Pin:
+            toggle_led_state(LD6_Pin, LD6_GPIO_Port);
+            break;
+        default:
+            break;
+    }
+
+    button_pressed.confirmation = 0;
+    button_pressed.GPIO_Pin = 0;
+    button_pressed.GPIO_Port = NULL;
+    Interrupts_GPIO_enable();
+}
