@@ -122,7 +122,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     if(button_pressed.confirmation)
     {
-        button_pressede_functionality(button_pressed.GPIO_Pin, button_pressed.GPIO_Port);
+      button_pressed_functionality(button_pressed.GPIO_Pin);
     }
   }
   /* USER CODE END 3 */

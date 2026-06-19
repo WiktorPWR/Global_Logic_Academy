@@ -16,4 +16,6 @@ void Interrupts_GPIO_disable(void);
 
 void Interrupts_GPIO_enable(void);
 
+void button_pressed_functionality(uint16_t GPIO_Pin);
+
 #endif /* __BUTTONS_FUNCTIONS_H */
