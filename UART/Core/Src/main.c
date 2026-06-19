@@ -114,6 +114,7 @@ int main(void)
   MX_TIM3_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_UARTEx_ReceiveToIdle_DMA(huart3, uint8_t *pData, uint16_t Size);
   /* USER CODE END 2 */
 
   /* Infinite loop */
