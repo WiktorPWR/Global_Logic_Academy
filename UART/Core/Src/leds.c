@@ -1,3 +1,4 @@
+#include "main.h"
 #include "leds.h"
 
 volatile struct LEDS leds = {GPIO_PIN_RESET, GPIO_PIN_RESET, GPIO_PIN_RESET, GPIO_PIN_RESET};

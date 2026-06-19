@@ -67,7 +67,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 }
 
 
-void button_pressede_functionality(uint16_t GPIO_Pin, GPIO_TypeDef* GPIO_Port)
+void button_pressed_functionality(uint16_t GPIO_Pin)
 {
     switch (GPIO_Pin) {
         case SWT1_Pin:
