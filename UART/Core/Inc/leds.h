@@ -14,8 +14,8 @@ extern volatile struct LEDS leds;
 
 void init_leds_states();
 
-void toggle_all_leds();
-
 void toggle_led_state(uint16_t GPIO_Pin, GPIO_TypeDef* GPIO_Port);
+
+void toggle_all_leds();
 
 #endif

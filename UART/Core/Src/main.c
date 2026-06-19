@@ -110,7 +110,6 @@ int main(void)
   MX_TIM3_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-  init_leds_states();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -121,6 +120,10 @@ int main(void)
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
+    if(button_pressed.confirmation)
+    {
+        button_pressede_functionality(button_pressed.GPIO_Pin, button_pressed.GPIO_Port);
+    }
   }
   /* USER CODE END 3 */
 }

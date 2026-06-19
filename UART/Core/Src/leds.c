@@ -1,13 +1,6 @@
 #include "leds.h"
 
-volatile struct LEDS leds;
-
-void init_leds_states(){
-    leds.blue_led_status = GPIO_PIN_RESET;
-    leds.red_led_status = GPIO_PIN_RESET;
-    leds.orange_led_status = GPIO_PIN_RESET;
-    leds.green_led_status = GPIO_PIN_RESET;
-}
+volatile struct LEDS leds = {GPIO_PIN_RESET, GPIO_PIN_RESET, GPIO_PIN_RESET, GPIO_PIN_RESET};
 
 void toggle_led_state(uint16_t GPIO_Pin, GPIO_TypeDef* GPIO_Port){
     if(GPIO_Pin == LD3_Pin)
@@ -43,6 +36,7 @@ void toggle_led_state(uint16_t GPIO_Pin, GPIO_TypeDef* GPIO_Port){
             leds.green_led_status = GPIO_PIN_SET;
         }
     }
+    HAL_GPIO_TogglePin(GPIO_Port, GPIO_Pin);
 }
 
 void toggle_all_leds(){
