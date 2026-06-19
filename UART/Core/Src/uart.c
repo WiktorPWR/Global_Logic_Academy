@@ -1,4 +1,6 @@
 #include "uart.h"
+#include <string.h>
+#include <stdio.h>
 
 uint8_t rx_buffer[RX_BUFFER_SIZE] = {0};
 
@@ -36,35 +38,34 @@ static enum Commands UART_parse_data(uint8_t *data, uint16_t size){
     return WRONG_COMMAND;
 }
 
-static void send_error_message(){
-    const char *error_message = "WRONG COMMAND\r\n";
-    HAL_UART_Transmit_DMA(&huart3, (uint8_t *)error_message, strlen(error_message));
-}
+// static void send_error_message(){
+//     const char *error_message = "WRONG COMMAND\r\n";
+//     HAL_UART_Transmit_DMA(&huart3, (uint8_t *)error_message, strlen(error_message));
+// }
 
 static void print_led_status(enum Commands command){
     switch (command) {
         case TOGGLE_BLUE_LED:
-            sprintf(tx_buffer, "BLUE LED TOGGLED, STATE :%d \r\n", leds.blue_led_status);
-
+            sprintf((char *)tx_buffer, "BLUE LED TOGGLED, STATE :%d \r\n", leds.blue_led_status);
             break;
         case TOGGLE_RED_LED:
-            sprintf(tx_buffer, "RED LED TOGGLED, STATE :%d \r\n", leds.red_led_status);
+            sprintf((char *)tx_buffer, "RED LED TOGGLED, STATE :%d \r\n", leds.red_led_status);
             break;
         case TOGGLE_ORANGE_LED:
-            sprintf(tx_buffer, "ORANGE LED TOGGLED, STATE :%d \r\n", leds.orange_led_status);
+            sprintf((char *)tx_buffer, "ORANGE LED TOGGLED, STATE :%d \r\n", leds.orange_led_status);
             break;
         case TOGGLE_GREEN_LED:
-            sprintf(tx_buffer, "GREEN LED TOGGLED, STATE :%d \r\n", leds.green_led_status);
+            sprintf((char *)tx_buffer, "GREEN LED TOGGLED, STATE :%d \r\n", leds.green_led_status);
             break;
         case TOGGLE_ALL_LEDS:
-            sprintf(tx_buffer, "ALL LEDS TOGGLED, STATE :%d ,%d, %d, %d \r\n", leds.blue_led_status, leds.red_led_status, leds.orange_led_status, leds.green_led_status);
+            sprintf((char *)tx_buffer, "ALL LEDS TOGGLED, STATE :%d ,%d, %d, %d \r\n", leds.blue_led_status, leds.red_led_status, leds.orange_led_status, leds.green_led_status);
             break;
         default:
-            sprintf(tx_buffer, "UNKNOWN COMMAND\r\n");
+            sprintf((char *)tx_buffer, "UNKNOWN COMMAND\r\n");
             break;
     }
     
-    HAL_UART_Transmit_DMA(&huart3, (uint8_t *)tx_buffer, strlen(tx_buffer));
+    HAL_UART_Transmit_DMA(&huart3, (uint8_t *)tx_buffer, strlen((char *)tx_buffer));
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
@@ -91,7 +92,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
                 toggle_all_leds();
                 break;
             default:
-                send_error_message();
+                // send_error_message();
                 break;
         }
         print_led_status(command);

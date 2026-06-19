@@ -8,7 +8,7 @@ struct Button_pressed{
     uint16_t GPIO_Pin;
     GPIO_TypeDef* GPIO_Port;
     uint8_t confirmation;
-}
+};
 
 extern volatile struct Button_pressed button_pressed;
 

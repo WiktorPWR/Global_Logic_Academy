@@ -22,7 +22,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+ #include "uart.h"
+ #include "buttons_functions.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -114,7 +115,7 @@ int main(void)
   MX_TIM3_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UARTEx_ReceiveToIdle_DMA(huart3, uint8_t *pData, uint16_t Size);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart3, rx_buffer, RX_BUFFER_SIZE);
   /* USER CODE END 2 */
 
   /* Infinite loop */

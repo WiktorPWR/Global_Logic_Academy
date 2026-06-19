@@ -3,7 +3,7 @@
 
 extern TIM_HandleTypeDef htim3;
 
-volatile Button_pressed button_pressed = {0, NULL, 0};
+volatile struct Button_pressed button_pressed = {0, NULL, 0};
 
 
 /**
