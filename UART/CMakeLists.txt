@@ -41,7 +41,6 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/buttons_functions.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/leds.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/uart.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/timer_functions.c"
 )
 
 # Add project symbols (macros)

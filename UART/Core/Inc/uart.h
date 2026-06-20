@@ -20,6 +20,7 @@ enum Commands {
     WRONG_COMMAND = 0xFF,
 };
 
+void print_led_status(enum Commands command);
 
 
 

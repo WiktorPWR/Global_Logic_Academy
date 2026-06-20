@@ -3,6 +3,7 @@
 
 #include "main.h"
 
+#define DEBOUNCE_TIME_MS 100
 
 struct Button_pressed{
     uint16_t GPIO_Pin;
