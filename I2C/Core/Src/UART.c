@@ -44,37 +44,33 @@ void parse_and_execute_command(const char* command, uint16_t size){
 
 
 HAL_StatusTypeDef process_uart_data(uint8_t *data, uint16_t size, uint8_t *overflow_data, uint8_t overflow_size) {
-    if(data == NULL){
+    if (data == NULL || size == 0) {
         return HAL_ERROR;
     }
 
-    if(size == 0){
-        return HAL_ERROR;
+    uint16_t raw_data_size = size;
+    if (overflow_data != NULL) {
+        raw_data_size += overflow_size;
     }
 
-    if(overflow_data == NULL){
-        // Process the data normally
-        //For now we just simply send a echo back the received data
-        HAL_UART_Transmit(&huart3, data, size, HAL_MAX_DELAY);
-        parse_and_execute_command((const char*)data, size);
-        return HAL_OK;
-    }else{
-        uint16_t full_data_size = size + overflow_size;
-        char full_data[full_data_size + 1]; // +1 for null terminator
+    uint16_t full_data_size = raw_data_size + 2; 
+    char full_data[full_data_size + 1]; 
+
+    memcpy(full_data, data, size);
     
-        memcpy(full_data, data, size);
-        
-        if(overflow_size > 0){
-            memcpy(full_data + size, overflow_data, overflow_size);
-        }
-
-        full_data[full_data_size] = '\0'; // Null terminate the string
-
-
-        HAL_UART_Transmit(&huart3, (uint8_t *)full_data, full_data_size, HAL_MAX_DELAY);
-        parse_and_execute_command((const char*)full_data, full_data_size);
-        return HAL_OK;
+    if (overflow_data != NULL && overflow_size > 0) {
+        memcpy(full_data + size, overflow_data, overflow_size);
     }
+
+    full_data[raw_data_size]     = '\r';
+    full_data[raw_data_size + 1] = '\n';
+    full_data[full_data_size]     = '\0';
+
+    HAL_UART_Transmit(&huart3, (uint8_t *)full_data, full_data_size, HAL_MAX_DELAY);
+    
+    parse_and_execute_command((const char*)full_data, full_data_size);
+
+    return HAL_OK;
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
