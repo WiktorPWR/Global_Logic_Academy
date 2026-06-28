@@ -24,7 +24,8 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 enable_language(C ASM)
 
 # Create an executable object type
-add_executable(${CMAKE_PROJECT_NAME})
+add_executable(${CMAKE_PROJECT_NAME}
+    Core/Inc/UART_Commands.h)
 
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
@@ -32,6 +33,7 @@ add_subdirectory(cmake/stm32cubemx)
 # Plik UART.c dodajemy do źródeł (ze zwykłym slashem '/')
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     "Core/Src/UART.c"
+    "Core/Src/UART_Commands.c"
 
     # Add user sources here
 )
