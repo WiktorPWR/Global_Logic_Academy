@@ -109,6 +109,7 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart3, (uint8_t *)uart3_rx_buffer, UART_RX_BUFFER_SIZE);
 
   /* USER CODE END 2 */
 
