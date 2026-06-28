@@ -13,4 +13,7 @@ HAL_StatusTypeDef CANALS_OFF(uint8_t *data, uint16_t size);
 HAL_StatusTypeDef CANAL_STATUS(uint8_t *data, uint16_t size);
 HAL_StatusTypeDef CANALS_STATUS(uint8_t *data, uint16_t size);
 
+HAL_StatusTypeDef CANALS_SLEEP_SET_MODE(uint8_t *data, uint16_t size);
+HAL_StatusTypeDef CANALS_SLEEP_CLEAR_MODE(uint8_t *data, uint16_t size);
+
 #endif // UART_COMMANDS_H
