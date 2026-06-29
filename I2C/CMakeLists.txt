@@ -34,6 +34,7 @@ add_subdirectory(cmake/stm32cubemx)
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     "Core/Src/UART.c"
     "Core/Src/UART_Commands.c"
+    "Core/Src/PCA9685/Interface.c"
 
     # Add user sources here
 )

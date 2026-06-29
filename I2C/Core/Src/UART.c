@@ -19,8 +19,8 @@ const struct UART_Command uart_commands[] = {
     {CANALS_FREQUENCY, "CANALS_FREQUENCY"},
     {CANALS_ON, "CANALS_ON"},
     {CANALS_OFF, "CANALS_OFF"},
-    {CANAL_STATUS, "CANAL_STATUS"},
-    {CANALS_STATUS, "CANALS_STATUS"}
+    {CANALS_SLEEP_SET_MODE, "CANALS_SLEEP_SET_MODE"},
+    {CANALS_SLEEP_CLEAR_MODE, "CANALS_SLEEP_CLEAR_MODE"}
 };
 
 #define UART_COMMANDS_COUNT (sizeof(uart_commands) / sizeof(uart_commands[0]))
@@ -28,17 +28,23 @@ const struct UART_Command uart_commands[] = {
 
 void parse_and_execute_command(const char* command, uint16_t size){
     for(int i = 0; i < UART_COMMANDS_COUNT; i++){
-        if(strcmp(command, uart_commands[i].command_name) == 0){
-            // Command found, execute it
+        uint16_t cmd_len = strlen(uart_commands[i].command_name);
+        
+        /* Compare only the prefix matching the length of the command name */
+        if(strncmp(command, uart_commands[i].command_name, cmd_len) == 0){
+            
+            /* Command recognized, pass the whole data buffer to the designated function */
             HAL_StatusTypeDef status = uart_commands[i].process_command((uint8_t *)command, size);
+            
             if(status != HAL_OK){
                 HAL_UART_Transmit(&huart3, (uint8_t *)"Error executing command\r\n", 26, HAL_MAX_DELAY);
             }
-            return;
-        }else{
-            HAL_UART_Transmit(&huart3, (uint8_t *)"Unknown command\r\n", 17, HAL_MAX_DELAY);
+            return; /* Execution finished, exit the function immediately */
         }
     }
+    
+    /* This line is reached ONLY if the loop finishes and NO match was found */
+    HAL_UART_Transmit(&huart3, (uint8_t *)"Unknown command\r\n", 17, HAL_MAX_DELAY);
 }
 
 
