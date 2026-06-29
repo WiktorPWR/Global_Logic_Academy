@@ -110,10 +110,14 @@ HAL_StatusTypeDef CANALS_OFF(uint8_t *data, uint16_t size) {
 
 
 HAL_StatusTypeDef CANALS_SLEEP_SET_MODE(uint8_t *data, uint16_t size){
+    HAL_UART_Transmit(&huart3, (uint8_t *)"CANALS_SLEEP_SET_MODE command received\r\n", 39, HAL_MAX_DELAY);
     sleep_procedure();
     return HAL_OK;
 }
+
+
 HAL_StatusTypeDef CANALS_SLEEP_CLEAR_MODE(uint8_t *data, uint16_t size){
+    HAL_UART_Transmit(&huart3, (uint8_t *)"CANALS_SLEEP_CLEAR_MODE command received\r\n", 41, HAL_MAX_DELAY);
     wake_up_procedure();
     return HAL_OK;
 }
