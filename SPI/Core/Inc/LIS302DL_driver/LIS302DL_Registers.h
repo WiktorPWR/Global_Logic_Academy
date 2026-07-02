@@ -1,7 +1,8 @@
 /**
  * ******************************************************************************
  * @file    lis302dl_regs.h
- * @brief   Register map and bit definitions for the LIS302DL accelerometer.
+ * @brief   Register map, bit definitions, and complete configuration values 
+ * for the LIS302DL accelerometer.
  * Based on STMicroelectronics technical datasheet (Rev 1).
  * ******************************************************************************
  */
@@ -152,6 +153,46 @@ extern "C" {
  */
 #define LIS302DL_FF_WU_THS_DCRM         (1 << 7) /**< Counter resetting mode selection: 0 = counter reset, 1 = counter decremented */
 #define LIS302DL_FF_WU_THS_MASK         (0x7F << 0) /**< 7-bit Free-fall/wake-up Threshold mask (THS6 - THS0) */
+
+
+/* ========================================================================== */
+/* COMPLETE CONFIGURATION VALUES (Full Register Bytes)                        */
+/* ========================================================================== */
+
+/** * CTRL_REG1 (20h) - Operational Modes (All XYZ axes enabled by default)
+ */
+#define LIS302DL_CR1_CONFIG_POWER_DOWN       0x00 /**< Device in low-power shutdown mode */
+#define LIS302DL_CR1_CONFIG_ACTIVE_2G_100HZ  0x47 /**< Active, +/-2g range, 100 Hz Data Rate, XYZ enabled */
+#define LIS302DL_CR1_CONFIG_ACTIVE_2G_400HZ  0xC7 /**< Active, +/-2g range, 400 Hz Data Rate, XYZ enabled */
+#define LIS302DL_CR1_CONFIG_ACTIVE_8G_100HZ  0x67 /**< Active, +/-8g range, 100 Hz Data Rate, XYZ enabled */
+#define LIS302DL_CR1_CONFIG_ACTIVE_8G_400HZ  0xE7 /**< Active, +/-8g range, 400 Hz Data Rate, XYZ enabled */
+
+/** * CTRL_REG2 (21h) - High-Pass Filter configurations (Standard 4-wire SPI)
+ */
+#define LIS302DL_CR2_CONFIG_BYPASS_ALL       0x00 /**< All digital filters bypassed */
+#define LIS302DL_CR2_CONFIG_HPF_INT1_2HZ     0x04 /**< HPF on for Gen 1, Cut-off: 2Hz@100Hz ODR / 8Hz@400Hz ODR */
+#define LIS302DL_CR2_CONFIG_HPF_INT1_1HZ     0x05 /**< HPF on for Gen 1, Cut-off: 1Hz@100Hz ODR / 4Hz@400Hz ODR */
+#define LIS302DL_CR2_CONFIG_HPF_INT1_0_5HZ   0x06 /**< HPF on for Gen 1, Cut-off: 0.5Hz@100Hz ODR / 2Hz@400Hz ODR */
+#define LIS302DL_CR2_CONFIG_HPF_INT1_0_25HZ  0x07 /**< HPF on for Gen 1, Cut-off: 0.25Hz@100Hz ODR / 1Hz@400Hz ODR */
+#define LIS302DL_CR2_CONFIG_HPF_BOTH_2HZ     0x0C /**< HPF on for Gen 1 & Gen 2, Cut-off: 2Hz@100Hz / 8Hz@400Hz */
+#define LIS302DL_CR2_CONFIG_HPF_BOTH_0_25HZ  0x0F /**< HPF on for Gen 1 & Gen 2, Cut-off: 0.25Hz@100Hz / 1Hz@400Hz */
+#define LIS302DL_CR2_CONFIG_HPF_DATA_AND_INT 0x1C /**< Filtered data sent to outputs AND both interrupt blocks */
+
+/** * CTRL_REG3 (22h) - Signal Pad Mapping (Push-Pull, Active High output states)
+ */
+#define LIS302DL_CR3_MAP_INT1_WAKEUP1        0x01 /**< INT1 outputs Gen 1 signal; INT2 tied to GND */
+#define LIS302DL_CR3_MAP_INT2_WAKEUP2        0x10 /**< INT2 outputs Gen 2 signal; INT1 tied to GND */
+#define LIS302DL_CR3_MAP_INT1_DATA_READY     0x04 /**< INT1 outputs Data Ready flag; INT2 tied to GND */
+#define LIS302DL_CR3_MAP_INT2_DATA_READY     0x20 /**< INT2 outputs Data Ready flag; INT1 tied to GND */
+#define LIS302DL_CR3_MAP_INT1_GEN1_INT2_GEN2 0x11 /**< INT1 maps Gen 1 AND INT2 maps Gen 2 simultaneously */
+#define LIS302DL_CR3_MAP_ALL_INTERRUPTS_INT1 0x03 /**< INT1 triggers if Gen 1 OR Gen 2 fires an event */
+
+/** * FF_WU_CFG_x (30h / 34h) - Logic configuration bytes (Latched output via LIR=1)
+ */
+#define LIS302DL_INT_CFG_FREE_FALL           0xC5 /**< AND combination, Latch enabled, triggers when X,Y,Z are Low */
+#define LIS302DL_INT_CFG_WAKEUP_ANY_AXIS     0x6A /**< OR combination, Latch enabled, triggers when X, Y, or Z goes High */
+#define LIS302DL_INT_CFG_WAKEUP_XY_ONLY      0x2A /**< OR combination, Latch enabled, triggers on dynamic X or Y changes */
+#define LIS302DL_INT_CFG_WAKEUP_Z_ONLY       0x60 /**< OR combination, Latch enabled, triggers only on Z shifts */
 
 
 /* ========================================================================== */
