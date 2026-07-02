@@ -20,26 +20,9 @@ HAL_StatusTypeDef LIS302DL_Init(void);
  */
 HAL_StatusTypeDef LIS302DL_Check_ID(void);
 
-/**
- * @brief  Configures the Output Data Rate (ODR).
- * @param  data_rate: Use macros like LIS302DL_CR1_DR_100HZ or LIS302DL_CR1_DR_400HZ.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Data_Rate_Config(uint8_t data_rate);
 
-/**
- * @brief  Sets device power mode (Power-Down or Active).
- * @param  power_mode: Use LIS302DL_CR1_PD_POWER_DOWN or LIS302DL_CR1_PD_ACTIVE.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Power_Mode_Config(uint8_t power_mode);
+HAL_StatusTypeDef LIS302DL_Core_Config(uint8_t data_rate, uint8_t power_mode, uint8_t full_scale);
 
-/**
- * @brief  Configures full-scale measurement range (+/-2g or +/-8g).
- * @param  full_scale: Use LIS302DL_CR1_FS_2G or LIS302DL_CR1_FS_8G.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Full_Scale_Config(uint8_t full_scale);
 
 
 /* ========================================================================== */
