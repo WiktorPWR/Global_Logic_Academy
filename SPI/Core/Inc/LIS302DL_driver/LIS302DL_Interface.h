@@ -3,108 +3,46 @@
 
 #include "main.h"
 #include <stdint.h>
+#include "LIS302DL_object.h"
+
+extern struct LIS302DL_Object lis302dl;
 
 /* ========================================================================== */
 /* 1. CORE DEVICE MANAGEMENT & INITIALIZATION                                 */
 /* ========================================================================== */
 
-/**
- * @brief  Initializes the LIS302DL device with safe default parameters.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Init(void);
-
-/**
- * @brief  Checks device availability by reading and validating the WHO_AM_I register.
- * @retval HAL_OK if device is present, HAL_ERROR otherwise.
- */
-HAL_StatusTypeDef LIS302DL_Check_ID(void);
+enum LIS302DL_Interrut_Block{
+    LIS302DL_INT_BLOCK_1 = 0,
+    LIS302DL_INT_BLOCK_2 = 1
+};
 
 
-HAL_StatusTypeDef LIS302DL_Core_Config(uint8_t data_rate, uint8_t power_mode, uint8_t full_scale);
+#define LIS302DL_SPI_TIMEOUT 100
+
+typedef struct {
+    SPI_HandleTypeDef *hspi;
+    GPIO_TypeDef      *cs_port;
+    uint16_t          cs_pin;
+    struct LIS302DL_Object data; /* Local shadow copy of the registers */
+} LIS302DL_HandleTypeDef;
 
 
+HAL_StatusTypeDef LIS302DL_Check_ID(LIS302DL_HandleTypeDef *dev);
+HAL_StatusTypeDef LIS302DL_Init(LIS302DL_HandleTypeDef *dev);
+
+HAL_StatusTypeDef LIS302DL_CtrlReg1_Config(LIS302DL_HandleTypeDef *dev, uint8_t data_rate, uint8_t power_mode, uint8_t full_scale, uint8_t stp, uint8_t stm, uint8_t zen, uint8_t yen, uint8_t xen);
+HAL_StatusTypeDef LIS302DL_CtrlReg2_Config(LIS302DL_HandleTypeDef *dev, uint8_t sim, uint8_t boot, uint8_t fds, uint8_t hp_ff_wu2, uint8_t hp_ff_wu1);
+HAL_StatusTypeDef LIS302DL_CtrlReg3_Config(LIS302DL_HandleTypeDef *dev, uint8_t i1_cfg, uint8_t i2_cfg, uint8_t ppol);
+
+HAL_StatusTypeDef LIS302DL_FF_WU_CFG(LIS302DL_HandleTypeDef *dev, enum LIS302DL_Interrut_Block interrupt_block, uint8_t aoi, uint8_t lir, uint8_t zhie, uint8_t zlie, uint8_t yhie, uint8_t ylie, uint8_t xhie, uint8_t xlie);
+HAL_StatusTypeDef LIS302DL_FF_WU_THS(LIS302DL_HandleTypeDef *dev, enum LIS302DL_Interrut_Block interrupt_block, uint8_t dcrm, uint8_t threshold);
+HAL_StatusTypeDef LIS302DL_FF_WU_DURATION(LIS302DL_HandleTypeDef *dev, enum LIS302DL_Interrut_Block interrupt_block, uint8_t duration);
 
 /* ========================================================================== */
 /* 2. DATA ACQUISITION & ACCELERATION READING                                 */
 /* ========================================================================== */
 
-/**
- * @brief  Reads current raw 8-bit acceleration data for X, Y, and Z axes.
- * @param  x, y, z: Pointers to int8_t variables to store the results.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Read_XYZ_Values(int8_t *x, int8_t *y, int8_t *z);
-
-/**
- * @brief  Reads the internal data status register (data ready, overrun flags).
- * @param  status: Pointer to a variable where status mask will be saved.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Read_Status(uint8_t *status);
-
-
-/* ========================================================================== */
-/* 3. HARDWARE HIGH-PASS FILTER CONFIGURATION                                 */
-/* ========================================================================== */
-
-/**
- * @brief  Configures internal high-pass filter paths and cut-off frequencies.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Filter_Config(uint8_t filter_config);
-
-/**
- * @brief  Instantaneously resets the high-pass filter internal memory.
- * @note   Highly useful to clear false transient states after reorientation.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Filter_Reset(void);
-
-
-/* ========================================================================== */
-/* 4. INTERRUPT GENERATION MANAGEMENT (Wake-Up / Free-Fall)                   */
-/* ========================================================================== */
-
-/**
- * @brief  Enables interrupt conditions for selected axes and directions (High/Low).
- * @param  gen_id: Select generator (1 for FF_WU_1, 2 for FF_WU_2).
- * @param  cfg_mask: Bitmask combining event axes (e.g., LIS302DL_FF_WU_CFG_XHIE).
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Interrupt_Config(uint8_t gen_id, uint8_t cfg_mask);
-
-/**
- * @brief  Sets the acceleration threshold for the chosen interrupt generator.
- * @param  gen_id: Select generator (1 or 2).
- * @param  threshold: 7-bit threshold value.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Interrupt_Threshold_Config(uint8_t gen_id, uint8_t threshold);
-
-/**
- * @brief  Sets the minimum event duration before an interrupt is triggered.
- * @param  gen_id: Select generator (1 or 2).
- * @param  duration: Minimum duration value (step depends on ODR).
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Interrupt_Duration_Config(uint8_t gen_id, uint8_t duration);
-
-/**
- * @brief  Configures the internal routing of interrupt signals to the physical pads.
- * @param  pad_config: Value configuring active levels, push-pull/OD, and signal mapping.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Interrupt_Signal_Mapping(uint8_t pad_config);
-
-/**
- * @brief  Reads the source register of an interrupt generator to identify the axis that fired.
- * @note   Reading this register automatically clears the latched interrupt line.
- * @param  gen_id: Select generator (1 or 2).
- * @param  source: Pointer to store the interrupt source bitmask.
- * @retval HAL Status
- */
-HAL_StatusTypeDef LIS302DL_Interrupt_Read_Source(uint8_t gen_id, uint8_t *source);
-
+HAL_StatusTypeDef LIS302DL_Read_Status_Register(LIS302DL_HandleTypeDef *dev);
+HAL_StatusTypeDef LIS302DL_Read_Acceleration(LIS302DL_HandleTypeDef *dev);
 
 #endif /* LIS302DL_INTERFACE_H */

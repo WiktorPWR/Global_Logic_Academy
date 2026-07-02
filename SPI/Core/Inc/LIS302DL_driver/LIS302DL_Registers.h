@@ -1,7 +1,7 @@
 /**
  * ******************************************************************************
  * @file    lis302dl_regs.h
- * @brief   Register map, bit definitions, and complete configuration values 
+ * @brief   Register map, bit definitions, and register address array 
  * for the LIS302DL accelerometer.
  * Based on STMicroelectronics technical datasheet (Rev 1).
  * ******************************************************************************
@@ -207,6 +207,41 @@ extern "C" {
 
 /* I2C Bitmask for the Sub-address field */
 #define LIS302DL_I2C_SUB_INC_MASK       (1 << 7) /**< Most Significant Bit enables sub-address auto-increment */
+
+
+/* ========================================================================== */
+/* VALID REGISTER ADDRESSES ARRAY                                             */
+/* ========================================================================== */
+
+/**
+ * @brief Array containing all accessible non-reserved register addresses.
+ * Useful for building full register map loops or debugging dumps.
+ */
+static const uint8_t LIS302DL_Register_Addresses[] = {
+    LIS302DL_REG_WHO_AM_I,
+    LIS302DL_REG_CTRL_REG1,
+    LIS302DL_REG_CTRL_REG2,
+    LIS302DL_REG_CTRL_REG3,
+    LIS302DL_REG_HP_FILTER_RESET,
+    LIS302DL_REG_STATUS_REG,
+    LIS302DL_REG_OUT_X,
+    LIS302DL_REG_OUT_Y,
+    LIS302DL_REG_OUT_Z,
+    LIS302DL_REG_FF_WU_CFG_1,
+    LIS302DL_REG_FF_WU_SRC_1,
+    LIS302DL_REG_FF_WU_THS_1,
+    LIS302DL_REG_FF_WU_DURATION_1,
+    LIS302DL_REG_FF_WU_CFG_2,
+    LIS302DL_REG_FF_WU_SRC_2,
+    LIS302DL_REG_FF_WU_THS_2,
+    LIS302DL_REG_FF_WU_DURATION_2
+};
+
+/** Total count of valid operational registers in the LIS302DL device map. */
+#define LIS302DL_NUM_REGISTERS  (sizeof(LIS302DL_Register_Addresses) / sizeof(LIS302DL_Register_Addresses[0]))
+
+#define LIS302DL_START_ADDRESS 0x0F
+#define LIS302DL_END_ADDRESS   0x37
 
 #ifdef __cplusplus
 }
