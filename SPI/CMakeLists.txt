@@ -44,6 +44,8 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+    "Core\\Src\\LIS302DL_driver\\LIS302DL_Interface.c"
+    "Core\\Src\\accelerometer_functions.c"
 
     # Add user sources here
 )
@@ -51,6 +53,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     "Core\\Inc\\LIS302DL_driver\\.."
+    "Core\\Inc"
 
     # Add user defined include paths
 )

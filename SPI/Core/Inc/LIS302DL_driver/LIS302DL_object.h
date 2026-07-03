@@ -28,7 +28,7 @@ struct LIS302DL_Object{
     struct OUT_REGs OUT_REGS;
     struct FF_WU_CFGs FF_WU_CFGS_1;
     struct FF_WU_CFGs FF_WU_CFGS_2;
-}
+};
 
 
 #endif

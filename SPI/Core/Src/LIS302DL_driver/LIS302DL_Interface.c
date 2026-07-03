@@ -52,7 +52,7 @@ HAL_StatusTypeDef LIS302DL_Check_ID(LIS302DL_HandleTypeDef *dev) {
         return status;
     }
 
-    if (id == LIS302DL_ID) {
+    if (id == LIS302DL_REG_WHO_AM_I) {
         return HAL_OK;
     } else {
         return HAL_ERROR;
@@ -135,7 +135,7 @@ HAL_StatusTypeDef LIS302DL_CtrlReg1_Config(LIS302DL_HandleTypeDef *dev, uint8_t 
     uint8_t actual_reg_value = dev->data.CTRL_REGS.CRTL_REG1;
 
     /* 2. Clear specific bits to be overwritten */
-    actual_reg_value &= ~(LIS302DL_CR1_DR_MASK | LIS302DL_CR1_PD_MASK | LIS302DL_CR1_FS_MASK | 
+    actual_reg_value &= (uint8_t)~(LIS302DL_CR1_DR_MASK | LIS302DL_CR1_PD_MASK | LIS302DL_CR1_FS_MASK | 
                           LIS302DL_CR1_STP     | LIS302DL_CR1_STM     | LIS302DL_CR1_ZEN     | 
                           LIS302DL_CR1_YEN     | LIS302DL_CR1_XEN);
 
@@ -173,7 +173,7 @@ HAL_StatusTypeDef LIS302DL_CtrlReg2_Config(LIS302DL_HandleTypeDef *dev, uint8_t 
 HAL_StatusTypeDef LIS302DL_CtrlReg3_Config(LIS302DL_HandleTypeDef *dev, uint8_t i1_cfg, uint8_t i2_cfg, uint8_t ppod, uint8_t ihl) {
     uint8_t actual_reg_value = dev->data.CTRL_REGS.CRTL_REG3; 
 
-    actual_reg_value &= ~(LIS302DL_CR3_I1CFG_MASK | LIS302DL_CR3_I2CFG_MASK | LIS302DL_CR3_PP_OD | LIS302DL_CR3_IHL);
+    actual_reg_value &= (uint8_t)~(LIS302DL_CR3_I1CFG_MASK | LIS302DL_CR3_I2CFG_MASK | LIS302DL_CR3_PP_OD | LIS302DL_CR3_IHL);
 
     uint8_t config_value = actual_reg_value | i1_cfg | i2_cfg | ppod | ihl;
 
@@ -200,7 +200,7 @@ HAL_StatusTypeDef LIS302DL_FF_WU_CFG(LIS302DL_HandleTypeDef *dev, enum LIS302DL_
 
     uint8_t actual_reg_value = ff_wu_cfg->FF_WU_CFG;
 
-    actual_reg_value &= ~(LIS302DL_FF_WU_CFG_AOI | LIS302DL_FF_WU_CFG_LIR | 
+    actual_reg_value &= (uint8_t)~(LIS302DL_FF_WU_CFG_AOI | LIS302DL_FF_WU_CFG_LIR | 
                           LIS302DL_FF_WU_CFG_ZHIE | LIS302DL_FF_WU_CFG_ZLIE | 
                           LIS302DL_FF_WU_CFG_YHIE | LIS302DL_FF_WU_CFG_YLIE | 
                           LIS302DL_FF_WU_CFG_XHIE | LIS302DL_FF_WU_CFG_XLIE);
@@ -230,8 +230,9 @@ HAL_StatusTypeDef LIS302DL_FF_WU_THS(LIS302DL_HandleTypeDef *dev, enum LIS302DL_
 
     uint8_t actual_reg_value = ff_wu_cfg->FF_WU_THS;
 
-    actual_reg_value &= ~(LIS302DL_THS_DCRM_MASK | LIS302DL_THS_VALUE_MASK);
-    uint8_t config_value = actual_reg_value | dcrm | (threshold & LIS302DL_THS_VALUE_MASK);
+    actual_reg_value &= (uint8_t)~(LIS302DL_FF_WU_THS_DCRM | LIS302DL_FF_WU_THS_MASK);
+
+    uint8_t config_value = actual_reg_value | dcrm | (threshold & LIS302DL_FF_WU_THS_MASK);
 
     HAL_StatusTypeDef status = LIS302DL_SPI_WriteReg(dev, reg_address, config_value);
 
