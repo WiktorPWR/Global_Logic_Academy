@@ -1,6 +1,16 @@
 #include "accelerometer_functions.h"
 #include "LIS302DL_driver/LIS302DL_Registers.h"
 
+uint8_t new_data_available = 0;// this is flag for it
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+    if(GPIO_Pin == CS_I2C_SPI_Pin){
+        //we have new data available from the accelerometer
+        new_data_available = 1;
+    }
+}
+
 
 HAL_StatusTypeDef Accelerometer_Init(LIS302DL_HandleTypeDef *dev){
     HAL_StatusTypeDef status;
@@ -47,8 +57,34 @@ HAL_StatusTypeDef Accelerometer_Init(LIS302DL_HandleTypeDef *dev){
     return HAL_OK; 
 }
 
+HAL_StatusTypeDef Accelerometer_Read(LIS302DL_HandleTypeDef *dev){
+    HAL_StatusTypeDef status;
+    
+    status = LIS302DL_Read_Acceleration(dev);
+    if(status != HAL_OK){
+        return status;
+    }
+    return HAL_OK;
+}
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-  
+HAL_StatusTypeDef Accelerometer_Status(LIS302DL_HandleTypeDef *dev){
+    HAL_StatusTypeDef status;
+    status = LIS302DL_Read_Status_Register(dev);
+    if(status != HAL_OK){
+        return status;
+    }
+    return HAL_OK;
+}
+
+HAL_StatusTypeDef Accelerometer_Read_Status_and_Values(LIS302DL_HandleTypeDef *dev){
+    HAL_StatusTypeDef status;
+    status = LIS302DL_Read_Status_Register(dev);
+    if(status != HAL_OK){
+        return status;
+    }
+    status = LIS302DL_Read_Acceleration(dev);
+    if(status != HAL_OK){
+        return status;
+    }
+    return HAL_OK;
 }
