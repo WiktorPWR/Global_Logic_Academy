@@ -70,7 +70,9 @@ extern "C" {
 #define LIS302DL_CR1_FS_8G              (1 << 5) /**< +/-8g measurement range */
 
 #define LIS302DL_CR1_STP                (1 << 4) /**< Self Test P enable */
+#define LIS302DL_CR1_STP_DIS            (0 << 4) /**< Self Test P disable */
 #define LIS302DL_CR1_STM                (1 << 3) /**< Self Test M enable */
+#define LIS302DL_CR1_STM_DIS            (0 << 3) /**< Self Test M disable */
 #define LIS302DL_CR1_ZEN                (1 << 2) /**< Z-axis enable */
 #define LIS302DL_CR1_YEN                (1 << 1) /**< Y-axis enable */
 #define LIS302DL_CR1_XEN                (1 << 0) /**< X-axis enable */

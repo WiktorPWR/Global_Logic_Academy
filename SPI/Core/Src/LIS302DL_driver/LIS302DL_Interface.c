@@ -170,12 +170,12 @@ HAL_StatusTypeDef LIS302DL_CtrlReg2_Config(LIS302DL_HandleTypeDef *dev, uint8_t 
     return status;
 }
 
-HAL_StatusTypeDef LIS302DL_CtrlReg3_Config(LIS302DL_HandleTypeDef *dev, uint8_t i1_cfg, uint8_t i2_cfg, uint8_t ppol) {
-    uint8_t actual_reg_value = dev->data.CTRL_REGS.CRTL_REG3;
+HAL_StatusTypeDef LIS302DL_CtrlReg3_Config(LIS302DL_HandleTypeDef *dev, uint8_t i1_cfg, uint8_t i2_cfg, uint8_t ppod, uint8_t ihl) {
+    uint8_t actual_reg_value = dev->data.CTRL_REGS.CRTL_REG3; 
 
-    actual_reg_value &= ~(LIS302DL_CR3_I1CFG_MASK | LIS302DL_CR3_I2CFG_MASK | LIS302DL_CR3_PP_OD);
+    actual_reg_value &= ~(LIS302DL_CR3_I1CFG_MASK | LIS302DL_CR3_I2CFG_MASK | LIS302DL_CR3_PP_OD | LIS302DL_CR3_IHL);
 
-    uint8_t config_value = actual_reg_value | i1_cfg | i2_cfg | ppol;
+    uint8_t config_value = actual_reg_value | i1_cfg | i2_cfg | ppod | ihl;
 
     HAL_StatusTypeDef status = LIS302DL_SPI_WriteReg(dev, LIS302DL_REG_CTRL_REG3, config_value);
 
@@ -295,6 +295,21 @@ HAL_StatusTypeDef LIS302DL_Read_Acceleration(LIS302DL_HandleTypeDef *dev) {
     }
 
     return status;
+}
+
+HAL_StatusTypeDef LIS302DL_Read_FF_WU_SRC(LIS302DL_HandleTypeDef *dev, enum LIS302DL_Interrut_Block interrupt_block) {
+    struct FF_WU_CFGs *ff_wu_cfg;
+    uint8_t reg_address;
+
+    if (interrupt_block == LIS302DL_INT_BLOCK_1) {
+        ff_wu_cfg = &dev->data.FF_WU_CFGS_1;
+        reg_address = LIS302DL_REG_FF_WU_SRC_1;
+    } else {
+        ff_wu_cfg = &dev->data.FF_WU_CFGS_2;
+        reg_address = LIS302DL_REG_FF_WU_SRC_2;
+    }
+
+    return LIS302DL_SPI_ReadRegs(dev, reg_address, &ff_wu_cfg->FF_WU_SRC, 1);
 }
 
 
