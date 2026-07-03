@@ -27,8 +27,6 @@ typedef struct {
 } LIS3DSHTR_HandleTypeDef;
 
 
-HAL_StatusTypeDef LIS3DSHTR_Check_ID(LIS3DSHTR_HandleTypeDef *dev);
-HAL_StatusTypeDef LIS3DSHTR_Init(LIS3DSHTR_HandleTypeDef *dev);
 
 
 #endif /* LIS3DSHTR_INTERFACE_H */
