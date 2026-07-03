@@ -47,8 +47,6 @@ extern "C" {
 
 /* Main Control Registers */
 #define LIS3DSH_REG_CTRL_REG4           0x20 /**< Control register 4 (ODR, Axes enable) [Type: RW] */
-#define LIS3DSH_REG_CTRL_REG1           0x21 /**< State Machine 1 Control register [Type: RW] */
-#define LIS3DSH_REG_CTRL_REG2           0x22 /**< State Machine 2 Control register [Type: RW] */
 #define LIS3DSH_REG_CTRL_REG3           0x23 /**< Control register 3 (Interrupts, Reset) [Type: RW] */
 #define LIS3DSH_REG_CTRL_REG5           0x24 /**< Control register 5 (Full-Scale, BW, ST) [Type: RW] */
 #define LIS3DSH_REG_CTRL_REG6           0x25 /**< Control register 6 (FIFO, Addr Inc) [Type: RW] */

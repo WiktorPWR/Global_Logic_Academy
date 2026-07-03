@@ -14,7 +14,7 @@
 /* ========================================================================== */
 /* 0. STATIC HELPER FUNCTIONS (Internal use only)                             */
 /* ========================================================================== */
-static uint8_t* LISDSHTR_Get_Register_Pointer(struct LIS3DSHTR_Object *obj, uint8_t reg_addr) {
+uint8_t* LISDSHTR_Get_Register_Pointer(struct LIS3DSHTR_Object *obj, uint8_t reg_addr) {
     if (reg_addr >= 0x40 && reg_addr <= 0x7F) {
         struct LIS3DSH_SM_CFGs *sm = (reg_addr >= 0x60) ? &obj->SM2 : &obj->SM1;
         uint8_t local_addr = (reg_addr >= 0x60) ? (reg_addr - 0x20) : reg_addr;
@@ -98,7 +98,6 @@ static uint8_t* LISDSHTR_Get_Register_Pointer(struct LIS3DSHTR_Object *obj, uint
 }
 
 
-
 /**
  * @brief  Writes multiple bytes to specific LIS3DSHTR registers via SPI.
  * @note   Zero-buffer implementation. Eliminates intermediate local array allocations
@@ -109,7 +108,7 @@ static uint8_t* LISDSHTR_Get_Register_Pointer(struct LIS3DSHTR_Object *obj, uint
  * @param[in]     length    Number of bytes to be written to the sensor.
  * @retval HAL_StatusTypeDef HAL_OK if successful, HAL_ERROR or HAL_BUSY/TIMEOUT otherwise.
  */
-static HAL_StatusTypeDef LIS3DSHTR_SPI_WriteReg(LIS3DSHTR_HandleTypeDef *dev, uint8_t reg_addr, uint8_t *data, uint16_t length) {
+HAL_StatusTypeDef LIS3DSHTR_SPI_WriteReg(LIS3DSHTR_HandleTypeDef *dev, uint8_t reg_addr, uint8_t *data, uint16_t length) {
     
     /* 1. Input Parameter Validation (Guard Clauses) */
     if (length == 0 || data == NULL || dev == NULL) {
@@ -172,7 +171,7 @@ static HAL_StatusTypeDef LIS3DSHTR_SPI_WriteReg(LIS3DSHTR_HandleTypeDef *dev, ui
  * @param[in]     length    Number of bytes to read from the sensor.
  * @retval HAL_StatusTypeDef HAL_OK if successful, HAL_ERROR or HAL_BUSY/TIMEOUT otherwise.
  */
-static HAL_StatusTypeDef LIS3DSHTR_SPI_ReadRegs(LIS3DSHTR_HandleTypeDef *dev, uint8_t reg_addr, uint16_t length) {
+HAL_StatusTypeDef LIS3DSHTR_SPI_ReadRegs(LIS3DSHTR_HandleTypeDef *dev, uint8_t reg_addr, uint16_t length) {
     
     /* 1. Input Parameter Validation */
     if (length == 0 || dev == NULL) {
@@ -235,4 +234,45 @@ static HAL_StatusTypeDef LIS3DSHTR_SPI_ReadRegs(LIS3DSHTR_HandleTypeDef *dev, ui
 /* ========================================================================== */
 
 
+HAL_StatusTypeDef LIS3DSH_SetDataRate_And_PowerMode(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_DataRate data_rate ) {
+    dev->data.CTRL_REGS.CTRL_REG4 &= ~LIS3DSH_CR4_ODR_MASK; // Clear the ODR bits
+    uint8_t new_ctrl_reg4 = dev->data.CTRL_REGS.CTRL_REG4 | (data_rate << 4); // Set the new data rate
+    HAL_StatusTypeDef status = LIS3DSHTR_SPI_WriteReg(dev, LIS3DSH_REG_CTRL_REG4, &new_ctrl_reg4, 1);
+    if(status == HAL_OK) {
+        dev->data.CTRL_REGS.CTRL_REG4 = new_ctrl_reg4; // Update local shadow copy only if SPI write was successful
+    }
+    // Implementation for setting data rate and power mode
+    return status;
+}
 
+
+HAL_StatusTypeDef LIS3DSH_SetFullScale(LIS3DSHTR_HandleTypeDef *dev, LIS3DHS_FullScaleMode full_scale ){
+    dev->data.CTRL_REGS.CTRL_REG5 &= ~LIS3DSH_CR5_FSCALE_MASK; // Clear the FS bits
+    uint8_t new_ctrl_reg5 = dev->data.CTRL_REGS.CTRL_REG5 | (full_scale << 3); // Set the new full scale
+    HAL_StatusTypeDef status = LIS3DSHTR_SPI_WriteReg(dev, LIS3DSH_REG_CTRL_REG5, &new_ctrl_reg5, 1);
+    if(status == HAL_OK) {
+        dev->data.CTRL_REGS.CTRL_REG5 = new_ctrl_reg5; // Update local shadow copy only if SPI write was successful
+    }
+    return status;
+}
+
+
+HAL_StatusTypeDef LIS3DSH_EnableInterrupt(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_InterruptConfig_t *config){
+    dev->data.CTRL_REGS.CTRL_REG3 &= ~(LIS3DSH_CR3_DR_EN);
+    
+}
+
+HAL_StatusTypeDef LIS3DSH_Init(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_DataRate data_rate) {
+    HAL_StatusTypeDef status = HAL_OK;
+
+    //First we chec is there any device online
+    status = LIS3DSHTR_SPI_ReadRegs(dev, LIS3DSH_REG_WHO_AM_I, 1);
+    if(status != HAL_OK){
+        return HAL_ERROR;
+    }
+
+
+
+
+    return status;
+}

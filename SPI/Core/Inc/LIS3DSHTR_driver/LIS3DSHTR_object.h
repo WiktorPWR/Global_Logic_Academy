@@ -22,29 +22,29 @@ extern "C" {
 /**
  * @brief Configuration registers container (CTRL_REG3 to CTRL_REG6)
  */
-struct LIS3DSH_Ctrl_Regs {
+typedef struct {
     uint8_t CTRL_REG3; /**< Interrupt pad configuration (23h) */
     uint8_t CTRL_REG4; /**< Output data rate and axis enablement (20h) */
     uint8_t CTRL_REG5; /**< Full-scale, Anti-aliasing, Self-test (24h) */
     uint8_t CTRL_REG6; /**< FIFO control and address increment (25h) */
-};
+} LIS3DSH_Ctrl_Regs;
 
 /**
  * @brief 16-bit signed output data registers for X, Y, Z axes
  */
-struct LIS3DSH_Out_Regs {
+typedef struct {
     uint8_t OUT_X_L;   /**< X-axis output Low byte (28h) */
     uint8_t OUT_X_H   ; /**< X-axis output High byte (29h) */
     uint8_t OUT_Y_L;   /**< Y-axis output data Low byte (2Ah) */
     uint8_t OUT_Y_H;   /**< Y-axis output data High byte (2Bh) */
     uint8_t OUT_Z_L;   /**< Z-axis output data Low byte [Type: R] */
     uint8_t OUT_Z_H;   /**< Z-axis output data High byte [Type: R] */
-};
+} LIS3DSH_Out_Regs;
 
 /**
  * @brief Embedded State Machine internal sub-registers (Page 30)
  */
-struct LIS3DSH_SM_CFGs {
+typedef struct {
     uint8_t CTRL_REG;       /**< SM Control register (CTRL_REG1 for SM1 / CTRL_REG2 for SM2) */
     uint8_t STx[16];        /**< State Machine Code registers (16 steps opcode) */
     uint8_t TIM4;           /**< 8-bit general timer 4 */
@@ -64,7 +64,7 @@ struct LIS3DSH_SM_CFGs {
     uint8_t OUTS;           /**< Output flags axis state */
     uint8_t PEAK;           /**< Peak detected value */
     uint8_t DES;            /**< Decimation factor (SM2 only, reserved/dummy in SM1) */
-};
+} LIS3DSH_SM_CFGs;
 
 /* ========================================================================== */
 /* MAIN ACCELEROMETER LOCAL COPY OBJECT                                       */
@@ -73,7 +73,7 @@ struct LIS3DSH_SM_CFGs {
 /**
  * @brief Complete shadow register map structure of the LIS3DSH hardware state
  */
-struct LIS3DSHTR_Object {
+typedef struct {
     /* Device Info & ID */
     uint8_t OUT_T;          /**< Temperature sensor output data (0Ch)  */
     uint8_t INFO1;          /**< Information register 1 (0Dh)  */
@@ -90,7 +90,7 @@ struct LIS3DSHTR_Object {
 
     /* Core Status and Core Configurations */
     uint8_t STAT;           /**< Interrupt synchronization status (18h)  */
-    struct LIS3DSH_Ctrl_Regs CTRL_REGS; /**< Block of control registers (20h, 23h-25h)  */
+    LIS3DSH_Ctrl_Regs CTRL_REGS; /**< Block of control registers (20h, 23h-25h)  */
     uint8_t STATUS;         /**< Data Status indicator register (27h)  */
     
     /* System Timers & Extra Thresholds */
@@ -102,16 +102,16 @@ struct LIS3DSHTR_Object {
     uint8_t THRS3;          /**< Threshold value register 3 (1Fh)  */
 
     /* Raw Acceleration Deliverables */
-    struct LIS3DSH_Out_Regs OUT_REGS; /**< Block of 16-bit axis output data (28h-2Dh)  */
+    LIS3DSH_Out_Regs OUT_REGS; /**< Block of 16-bit axis output data (28h-2Dh)  */
 
     /* FIFO Buffers Management */
     uint8_t FIFO_CTRL;      /**< FIFO control configuration (2Eh)  */
     uint8_t FIFO_SRC;       /**< FIFO source status flags (2Fh)  */
 
     /* State Machines Blocks */
-    struct LIS3DSH_SM_CFGs SM1; /**< State Machine 1 fully addressable block (Registers from 21h, 40h-5Fh) [cite: 56, 640, 647] */
-    struct LIS3DSH_SM_CFGs SM2; /**< State Machine 2 fully addressable block (Registers from 22h, 60h-7Fh) [cite: 56, 647] */
-};
+    LIS3DSH_SM_CFGs SM1; /**< State Machine 1 fully addressable block (Registers from 21h, 40h-5Fh) [cite: 56, 640, 647] */
+    LIS3DSH_SM_CFGs SM2; /**< State Machine 2 fully addressable block (Registers from 22h, 60h-7Fh) [cite: 56, 647] */
+}LIS3DSHTR_Object;
 
 #ifdef __cplusplus
 }
