@@ -1,11 +1,11 @@
 #include "accelerometer_functions.h"
 #include "LIS302DL_driver/LIS302DL_Registers.h"
 
-uint8_t new_data_available = 0;// this is flag for it
+volatile uint8_t new_data_available = 0;// this is flag for it
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-    if(GPIO_Pin == CS_I2C_SPI_Pin){
+    if(GPIO_Pin == MEMS_INT1_Pin){
         //we have new data available from the accelerometer
         new_data_available = 1;
     }

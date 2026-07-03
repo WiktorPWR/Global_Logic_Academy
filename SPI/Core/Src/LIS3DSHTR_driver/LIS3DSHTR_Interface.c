@@ -1,6 +1,6 @@
-#include "LIS302DL_driver/LIS302DL_Interface.h"
-#include "LIS302DL_driver/LIS302DL_Registers.h"
-#include "LIS302DL_driver/LIS302DL_object.h"
+#include "LIS3DSHTR_driver/LIS3DSHTR_Interface.h"
+#include "LIS3DSHTR_driver/LIS3DSHTR_Registers.h"
+#include "LIS3DSHTR_driver/LIS3DSHTR_object.h"
 
 /* ========================================================================== */
 /* 0. STATIC HELPER FUNCTIONS (Internal use only)                             */
@@ -10,14 +10,8 @@
  * @brief  Writes a single byte to a specific LIS302DL register.
  */
 static HAL_StatusTypeDef LIS302DL_SPI_WriteReg(LIS302DL_HandleTypeDef *dev, uint8_t reg_addr, uint8_t data) {
-    uint8_t tx_buf[2];
-    tx_buf[0] = LIS302DL_SPI_WRITE | LIS302DL_SPI_MS_STAY | reg_addr;
-    tx_buf[1] = data;
 
-    HAL_GPIO_WritePin(dev->cs_port, dev->cs_pin, GPIO_PIN_RESET);
-    HAL_StatusTypeDef status = HAL_SPI_Transmit(dev->hspi, tx_buf, 2, LIS302DL_SPI_TIMEOUT);
-    HAL_GPIO_WritePin(dev->cs_port, dev->cs_pin, GPIO_PIN_SET);
-
+    
     return status;
 }
 
@@ -40,6 +34,7 @@ static HAL_StatusTypeDef LIS302DL_SPI_ReadRegs(LIS302DL_HandleTypeDef *dev, uint
 }
 
 
+
 /* ========================================================================== */
 /* 1. CORE DEVICE MANAGEMENT & INITIALIZATION                                 */
 /* ========================================================================== */
@@ -52,7 +47,7 @@ HAL_StatusTypeDef LIS302DL_Check_ID(LIS302DL_HandleTypeDef *dev) {
         return status;
     }
 
-    if (id == LIS302DL_REG_WHO_AM_I) {
+    if (id == LIS302DL_WHO_AM_I_VAL) {
         return HAL_OK;
     } else {
         return HAL_ERROR;
