@@ -47,8 +47,8 @@ typedef struct {
 typedef struct {
     uint8_t CTRL_REG;       /**< SM Control register (CTRL_REG1 for SM1 / CTRL_REG2 for SM2) */
     uint8_t STx[16];        /**< State Machine Code registers (16 steps opcode) */
-    uint8_t TIM4;           /**< 8-bit general timer 4 */
-    uint8_t TIM3;           /**< 8-bit general timer 3 */
+    uint8_t sm_tim4; /**< 8-bit general timer 4 for State Machine */
+    uint8_t sm_tim3; /**< 8-bit general timer 3 for State Machine */
     uint8_t TIM2_L;         /**< 16-bit general timer 2 Low byte */
     uint8_t TIM2_H;         /**< 16-bit general timer 2 High byte */
     uint8_t TIM1_L;         /**< 16-bit general timer 1 Low byte */

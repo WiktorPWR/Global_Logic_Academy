@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "accelerometer_functions.h"
+#include "LED/LED_interface.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,10 +66,11 @@ void MX_USB_HOST_Process(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-LIS302DL_HandleTypeDef lis302dl_handle = {
+LIS3DSHTR_HandleTypeDef lis302dl_handle = {
     .hspi = &hspi1,
     .cs_port = CS_I2C_SPI_GPIO_Port,
-    .cs_pin = CS_I2C_SPI_Pin
+    .cs_pin = CS_I2C_SPI_Pin,
+    .data = {0} // Initialize the local shadow copy of the registers to zero
 };
 /* USER CODE END 0 */
 
@@ -106,7 +108,8 @@ int main(void)
   MX_USB_HOST_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-  
+  LED_Init(&htim4);
+  LIS3DSH_Init(&lis302dl_handle, LIS3DSH_DATA_RATE_100_HZ);
 
   /* USER CODE END 2 */
 
@@ -120,7 +123,11 @@ int main(void)
     /* USER CODE BEGIN 3 */
     if(new_data_available){
         new_data_available = 0; // reset the flag
-        Accelerometer_Read_Status_and_Values(&lis302dl_handle);
+        HAL_StatusTypeDef status = Accelerometer_Read(&lis302dl_handle);
+        if(status != HAL_OK) {
+            // Handle error (e.g., log it, retry, etc.)
+        }
+        
     }
   }
   /* USER CODE END 3 */

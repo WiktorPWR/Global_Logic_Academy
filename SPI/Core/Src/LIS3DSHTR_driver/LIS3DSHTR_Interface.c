@@ -24,8 +24,8 @@ uint8_t* LISDSHTR_Get_Register_Pointer(LIS3DSHTR_Object *obj, uint8_t reg_addr) 
         }
 
         switch (local_addr) {
-            case 0x50: return &sm->TIM4;
-            case 0x51: return &sm->TIM3;
+            case 0x50: return &sm->sm_tim4;
+            case 0x51: return &sm->sm_tim3;
             case 0x52: return &sm->TIM2_L;
             case 0x53: return &sm->TIM2_H;
             case 0x54: return &sm->TIM1_L;
@@ -298,6 +298,14 @@ HAL_StatusTypeDef LIS3DSH_Init(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_DataRate da
     if(status != HAL_OK || dev->data.WHO_AM_I != LIS3DSH_WHO_AM_I_VAL) {
         return HAL_ERROR;
     }
+
+    uint8_t ctrl_reg4_value = dev->data.CTRL_REGS.CTRL_REG4; // Default value for CTRL_REG4
+    ctrl_reg4_value |= LIS3DSH_CR4_BDU; // Set the BDU bit to enable Block Data Update
+    status = LIS3DSHTR_SPI_WriteReg(dev, LIS3DSH_REG_CTRL_REG4, &ctrl_reg4_value, 1);
+    if(status != HAL_OK) {
+        return HAL_ERROR;
+    }
+    dev->data.CTRL_REGS.CTRL_REG4 = ctrl_reg4_value; // Update local shadow copy
 
     //Set the data rate and power mode
     status = LIS3DSH_SetDataRate_And_PowerMode(dev, data_rate);

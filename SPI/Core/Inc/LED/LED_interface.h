@@ -8,8 +8,6 @@
 
 HAL_StatusTypeDef LED_Init(TIM_HandleTypeDef *htim);
 
-HAL_StatusTypeDef LED_Frequency(uint32_t frequency);
-
 typedef enum{
     LED_GREEN,
     LED_RED,
