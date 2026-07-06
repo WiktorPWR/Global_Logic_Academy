@@ -258,8 +258,38 @@ HAL_StatusTypeDef LIS3DSH_SetFullScale(LIS3DSHTR_HandleTypeDef *dev, LIS3DHS_Ful
 
 
 HAL_StatusTypeDef LIS3DSH_EnableInterrupt(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_InterruptConfig_t *config){
-    dev->data.CTRL_REGS.CTRL_REG3 &= ~(LIS3DSH_CR3_DR_EN);
-    
+
+    uint8_t old_register_value = dev->data.CTRL_REGS.CTRL_REG3; // Store the current value of CTRL_REG3
+
+    if(config->pin == LIS3DSHTR_INT_1) {
+        dev->data.CTRL_REGS.CTRL_REG3 |= (LIS3DSH_CR3_INT1_EN | LIS3DSH_CR3_DR_EN); // Set INT1 enable bit and enable DRDY signal
+    } else if (config->pin == LIS3DSHTR_INT_2) {
+        dev->data.CTRL_REGS.CTRL_REG3 |= LIS3DSH_CR3_INT2_EN; // Set INT2 enable bit
+    } else {
+        return HAL_ERROR; // Invalid interrupt pin
+    }
+
+
+    if(config->polarity) {
+        dev->data.CTRL_REGS.CTRL_REG3 |= LIS3DSH_CR3_IEA; // Set interrupt polarity to active high
+    } else {
+        dev->data.CTRL_REGS.CTRL_REG3 &= ~LIS3DSH_CR3_IEA; // Set interrupt polarity to active low
+    }
+
+
+    if(config->latching) {
+        dev->data.CTRL_REGS.CTRL_REG3 |= LIS3DSH_CR3_IEL; // Set interrupt latching to latched
+    } else {
+        dev->data.CTRL_REGS.CTRL_REG3 &= ~LIS3DSH_CR3_IEL; // Set interrupt latching to pulsed
+    }
+
+
+    HAL_StatusTypeDef status = LIS3DSHTR_SPI_WriteReg(dev, LIS3DSH_REG_CTRL_REG3, &dev->data.CTRL_REGS.CTRL_REG3, 1);
+    if(status != HAL_OK) {
+        dev->data.CTRL_REGS.CTRL_REG3 = old_register_value; // Restore original value on failure
+    }
+    return status;
+
 }
 
 HAL_StatusTypeDef LIS3DSH_Init(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_DataRate data_rate) {
@@ -267,11 +297,26 @@ HAL_StatusTypeDef LIS3DSH_Init(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_DataRate da
 
     //First we chec is there any device online
     status = LIS3DSHTR_SPI_ReadRegs(dev, LIS3DSH_REG_WHO_AM_I, 1);
-    if(status != HAL_OK){
+    if(status != HAL_OK || dev->data.WHO_AM_I != LIS3DSH_WHO_AM_I_VAL) {
         return HAL_ERROR;
     }
 
+    //Set the data rate and power mode
+    status = LIS3DSH_SetDataRate_And_PowerMode(dev, data_rate);
+    if(status != HAL_OK) {
+        return HAL_ERROR;
+    }
 
+    //Set the full scale to 2G by default
+    status = LIS3DSH_SetFullScale(dev, LIS3DSH_FULL_SCALE_2G);
+    if(status != HAL_OK) {
+        return HAL_ERROR;
+    }
+
+    status = LIS3DSH_EnableInterrupt(dev, &(LIS3DSH_InterruptConfig_t){.pin = LIS3DSHTR_INT_1, .polarity = 1, .latching = 0});
+    if(status != HAL_OK) {
+        return HAL_ERROR;
+    }
 
 
     return status;

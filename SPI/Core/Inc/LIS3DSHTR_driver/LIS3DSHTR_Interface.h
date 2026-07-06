@@ -50,7 +50,6 @@ typedef enum{
 
 typedef struct{
     LIS3DSHTR_InterruptPin pin;
-    uint8_t enable;
     uint8_t polarity;
     uint8_t latching;
 
