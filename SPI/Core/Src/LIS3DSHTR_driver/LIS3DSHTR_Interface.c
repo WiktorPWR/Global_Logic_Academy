@@ -14,9 +14,9 @@
 /* ========================================================================== */
 /* 0. STATIC HELPER FUNCTIONS (Internal use only)                             */
 /* ========================================================================== */
-uint8_t* LISDSHTR_Get_Register_Pointer(struct LIS3DSHTR_Object *obj, uint8_t reg_addr) {
+uint8_t* LISDSHTR_Get_Register_Pointer(LIS3DSHTR_Object *obj, uint8_t reg_addr) {
     if (reg_addr >= 0x40 && reg_addr <= 0x7F) {
-        struct LIS3DSH_SM_CFGs *sm = (reg_addr >= 0x60) ? &obj->SM2 : &obj->SM1;
+        LIS3DSH_SM_CFGs *sm = (reg_addr >= 0x60) ? &obj->SM2 : &obj->SM1;
         uint8_t local_addr = (reg_addr >= 0x60) ? (reg_addr - 0x20) : reg_addr;
 
         if (local_addr >= 0x40 && local_addr <= 0x4F) {
@@ -63,8 +63,6 @@ uint8_t* LISDSHTR_Get_Register_Pointer(struct LIS3DSHTR_Object *obj, uint8_t reg
         /* Core Status and Core Configurations */
         case LIS3DSH_REG_STAT:         return &obj->STAT;
         case LIS3DSH_REG_CTRL_REG4:    return &obj->CTRL_REGS.CTRL_REG4;
-        case LIS3DSH_REG_CTRL_REG1:    return &obj->SM1.CTRL_REG; /* Zgodnie z nową strukturą obiektu */
-        case LIS3DSH_REG_CTRL_REG2:    return &obj->SM2.CTRL_REG; 
         case LIS3DSH_REG_CTRL_REG3:    return &obj->CTRL_REGS.CTRL_REG3;
         case LIS3DSH_REG_CTRL_REG5:    return &obj->CTRL_REGS.CTRL_REG5;
         case LIS3DSH_REG_CTRL_REG6:    return &obj->CTRL_REGS.CTRL_REG6;
@@ -148,7 +146,7 @@ HAL_StatusTypeDef LIS3DSHTR_SPI_WriteReg(LIS3DSHTR_HandleTypeDef *dev, uint8_t r
     if (status == HAL_OK) {
         for (uint16_t i = 0; i < length; i++) {
             /* Retrieve the memory pointer to the corresponding field in the local structure */
-            uint8_t *reg_ptr = LIS3DSHTR_Get_Register_Pointer(&dev->data, reg_addr + i);
+            uint8_t *reg_ptr = LISDSHTR_Get_Register_Pointer(&dev->data, reg_addr + i);
             
             /* If the register is mapped within the structure, update its local value */
             if (reg_ptr != NULL) {
@@ -202,7 +200,7 @@ HAL_StatusTypeDef LIS3DSHTR_SPI_ReadRegs(LIS3DSHTR_HandleTypeDef *dev, uint8_t r
     if (status == HAL_OK) {
         for (uint16_t i = 0; i < length; i++) {
             /* Map the virtual memory location to the hardware register address offset */
-            uint8_t *reg_ptr = LIS3DSHTR_Get_Register_Pointer(&dev->data, reg_addr + i);
+            uint8_t *reg_ptr = LISDSHTR_Get_Register_Pointer(&dev->data, reg_addr + i);
             
             if (reg_ptr != NULL) {
                 /* Receive 1 byte directly into the structure field memory location */
@@ -320,4 +318,20 @@ HAL_StatusTypeDef LIS3DSH_Init(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_DataRate da
 
 
     return status;
+}
+
+HAL_StatusTypeDef LIS3DSH_Read_Status_Register(LIS3DSHTR_HandleTypeDef *dev){
+    HAL_StatusTypeDef status = LIS3DSHTR_SPI_ReadRegs(dev, LIS3DSH_REG_STATUS, 1);
+    if(status != HAL_OK){
+        return status;
+    }
+    return HAL_OK;
+}
+
+HAL_StatusTypeDef LIS3DSH_Read_Acceleration(LIS3DSHTR_HandleTypeDef *dev){
+    HAL_StatusTypeDef status = LIS3DSHTR_SPI_ReadRegs(dev, LIS3DSH_REG_OUT_X_L, 6);
+    if(status != HAL_OK){
+        return status;
+    }
+    return HAL_OK;
 }
