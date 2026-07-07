@@ -1,14 +1,2 @@
-# Kompilaty i pliki binarne
-Debug/
-Release/
-*.elf
-*.bin
-*.hex
-*.map
-*.o
-*.d
-*.su
-
-# Pliki lokalne użytkownika (ustawienia IDE, które zmieniają się na różnych PC)
-.settings/
-*.launch
+\.vscode
+\.clangd

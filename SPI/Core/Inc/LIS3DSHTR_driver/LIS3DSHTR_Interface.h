@@ -55,4 +55,15 @@ typedef struct{
 
 }LIS3DSH_InterruptConfig_t;
 
+
+HAL_StatusTypeDef LIS3DSHTR_SPI_WriteReg(LIS3DSHTR_HandleTypeDef *dev, uint8_t reg_addr, uint8_t *data, uint16_t length);
+HAL_StatusTypeDef LIS3DSHTR_SPI_ReadRegs(LIS3DSHTR_HandleTypeDef *dev, uint8_t reg_addr, uint16_t length);
+HAL_StatusTypeDef LIS3DSH_SetDataRate_And_PowerMode(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_DataRate data_rate );
+HAL_StatusTypeDef LIS3DSH_SetFullScale(LIS3DSHTR_HandleTypeDef *dev, LIS3DHS_FullScaleMode full_scale );
+HAL_StatusTypeDef LIS3DSH_EnableInterrupt(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_InterruptConfig_t *config);
+HAL_StatusTypeDef LIS3DSH_Init(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_DataRate data_rate);
+HAL_StatusTypeDef LIS3DSH_Read_Status_Register(LIS3DSHTR_HandleTypeDef *dev);
+HAL_StatusTypeDef LIS3DSH_Read_Acceleration(LIS3DSHTR_HandleTypeDef *dev);
+
+
 #endif /* LIS3DSHTR_INTERFACE_H */
