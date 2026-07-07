@@ -46,7 +46,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     "Core\\Src\\LIS3DSHTR_driver\\LIS3DSHTR_Interface.c"
     "Core\\Src\\accelerometer_functions.c"
-    "Core\\Src\\LED\\.."
+    "Core\\Src\\LED\\LED_interface.c"
 
     # Add user sources here
 )

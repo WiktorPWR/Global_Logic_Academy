@@ -16,6 +16,8 @@ typedef enum{
 }LED_Color_t;
 
 
-HAL_StatusTypeDef LED_PWM_DutyCycle(LED_Color_t color, uint8_t duty_cycle);
+HAL_StatusTypeDef LED_PWM_DutyCycle(TIM_HandleTypeDef *htim,LED_Color_t color, uint8_t duty_cycle);
+
+HAL_StatusTypeDef LED_Angles_Update(int16_t ax, int16_t ay, int16_t az,TIM_HandleTypeDef *htim);
 
 #endif // LED_INTERFACE_H

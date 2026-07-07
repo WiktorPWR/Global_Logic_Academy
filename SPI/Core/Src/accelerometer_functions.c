@@ -9,9 +9,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
         //we have new data available from the accelerometer
         new_data_available = 1;
     }
+    NVIC_DisableIRQ(EXTI0_IRQn);
 }
 
 HAL_StatusTypeDef Accelerometer_Read(LIS3DSHTR_HandleTypeDef *dev){
+    
     HAL_StatusTypeDef status = LIS3DSH_Read_Status_Register(dev);
     if(status != HAL_OK){
         return status;

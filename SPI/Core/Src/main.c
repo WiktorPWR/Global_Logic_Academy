@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "accelerometer_functions.h"
 #include "LED/LED_interface.h"
+#include "LIS3DSHTR_driver/LIS3DSHTR_Registers.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,6 +109,7 @@ int main(void)
   MX_USB_HOST_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+  LIS3DSHTR_SPI_ReadRegs(&lis302dl_handle, LIS3DSH_REG_WHO_AM_I, 1);
   LED_Init(&htim4);
   LIS3DSH_Init(&lis302dl_handle, LIS3DSH_DATA_RATE_100_HZ);
 
@@ -127,7 +129,18 @@ int main(void)
         if(status != HAL_OK) {
             // Handle error (e.g., log it, retry, etc.)
         }
+        uint16_t ax = lis302dl_handle.data.OUT_REGS.OUT_X_H;
+        ax = (ax << 8) | lis302dl_handle.data.OUT_REGS.OUT_X_L;
+
+        uint16_t ay = lis302dl_handle.data.OUT_REGS.OUT_Y_H;
+        ay = (ay << 8) | lis302dl_handle.data.OUT_REGS.OUT_Y_L;
+
+        uint16_t az = lis302dl_handle.data.OUT_REGS.OUT_Z_H;
+        az = (az << 8) | lis302dl_handle.data.OUT_REGS.OUT_Z_L;
+
+        LED_Angles_Update(ax, ay, az, &htim4);
         
+        NVIC_EnableIRQ(EXTI0_IRQn); // Re-enable the interrupt for the next data-ready event
     }
   }
   /* USER CODE END 3 */

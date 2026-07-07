@@ -116,14 +116,9 @@ HAL_StatusTypeDef LIS3DSHTR_SPI_WriteReg(LIS3DSHTR_HandleTypeDef *dev, uint8_t r
     /* Command byte for the SPI write operation (allocated safely on stack, 1 byte only) */
     uint8_t command_byte = 0;
 
-    /* 2. Construct the SPI Control Byte (Address + Direction/Increment Flags) */
-    if (length > 1) {
-        /* Enable address auto-increment for multi-byte burst write */
-        command_byte = LIS3DSH_SPI_WRITE | LIS3DSH_SPI_MS_INCR | reg_addr;
-    } else {
-        /* Keep the address static for a single-byte register write */
-        command_byte = LIS3DSH_SPI_WRITE | LIS3DSH_SPI_MS_STAY | reg_addr;
-    }
+    /* Keep the address static for a single-byte register write */
+    command_byte = LIS3DSH_SPI_WRITE  | reg_addr;
+    
 
     /* 3. Physical Hardware Transmission */
     
@@ -160,6 +155,18 @@ HAL_StatusTypeDef LIS3DSHTR_SPI_WriteReg(LIS3DSHTR_HandleTypeDef *dev, uint8_t r
 }
 
 /**
+ * @brief  Writes multiple bytes to specific LIS3DSHTR registers via SPI using a unified frame.
+ * @note   Zero-buffer implementation for full-duplex hygiene. Prevents RX FIFO overflow
+ * by reading back dummy bytes simultaneously during the write cycle.
+ * @param[in,out] dev       Pointer to the LIS3DSHTR device handle structure.
+ * @param[in]     reg_addr  The target physical register address in the sensor.
+ * @param[in]     data      Pointer to the source buffer containing data to write.
+ * @param[in]     length    Number of bytes to be written to the sensor.
+ * @retval HAL_StatusTypeDef HAL_OK if successful, HAL_ERROR or HAL_BUSY/TIMEOUT otherwise.
+ */
+
+
+/**
  * @brief  Reads multiple bytes from LIS3DSHTR registers directly into the shadow copy.
  * @note   Zero-buffer implementation. This eliminates stack-allocated dynamic arrays (VLA)
  * and prevents shared-memory race conditions by streaming data directly into the
@@ -179,14 +186,9 @@ HAL_StatusTypeDef LIS3DSHTR_SPI_ReadRegs(LIS3DSHTR_HandleTypeDef *dev, uint8_t r
     /* Command byte for the SPI read operation (always 1 byte allocated on stack) */
     uint8_t command_byte = 0;
 
-    /* 2. Construct the SPI Command Byte (Read Bit + Address + Increment Flag) */
-    if (length > 1) {
-        /* Enable address auto-increment for multi-byte burst read */
-        command_byte = LIS3DSH_SPI_READ | LIS3DSH_SPI_MS_INCR | reg_addr;
-    } else {
-        /* Keep the address static for a single-byte register read */
-        command_byte = LIS3DSH_SPI_READ | LIS3DSH_SPI_MS_STAY | reg_addr;
-    }
+
+    /* Keep the address static for a single-byte register read */
+    command_byte = LIS3DSH_SPI_READ | reg_addr;
 
     /* 3. Physical Hardware Transaction */
     
@@ -204,7 +206,10 @@ HAL_StatusTypeDef LIS3DSHTR_SPI_ReadRegs(LIS3DSHTR_HandleTypeDef *dev, uint8_t r
             
             if (reg_ptr != NULL) {
                 /* Receive 1 byte directly into the structure field memory location */
-                status = HAL_SPI_Receive(dev->hspi, reg_ptr, 1, LIS3DSHTR_SPI_TIMEOUT);
+                //This part is only for debugging
+                uint8_t debug_byte;
+                status = HAL_SPI_Receive(dev->hspi, &debug_byte, 1, LIS3DSHTR_SPI_TIMEOUT);
+                reg_ptr[0] = debug_byte; // Update the local shadow copy with the received byte
             } else {
                 /* Dummy read buffer: maintains SPI clock alignment if the current register 
                    address is skipped or unmapped in our software configuration */
@@ -226,6 +231,38 @@ HAL_StatusTypeDef LIS3DSHTR_SPI_ReadRegs(LIS3DSHTR_HandleTypeDef *dev, uint8_t r
     return status;
 }
 
+// HAL_StatusTypeDef LIS3DSHTR_SPI_ReadRegs(LIS3DSHTR_HandleTypeDef *dev, uint8_t reg_addr, uint16_t length) {
+//     if (length == 0 || dev == NULL) return HAL_ERROR;
+
+//     // Tworzymy bezpieczny bufor na stosie dla jednej ciągłej ramki
+//     uint8_t tx_buf[17] = {0};
+//     uint8_t rx_buf[17] = {0};
+//     if (length > 16) length = 16;
+
+//     // Przygotowanie adresu z bitem READ (0x80)
+//     tx_buf[0] = LIS3DSH_SPI_READ | reg_addr;
+
+//     // CS w dół - start transmisji
+//     HAL_GPIO_WritePin(dev->cs_port, dev->cs_pin, GPIO_PIN_RESET);
+
+//     // KLUCZOWY MOMENT: Transmitujemy i odbieramy JEDNOCZEŚNIE. 
+//     // Zegar leci bez żadnej przerwy, idealnie w Trybie 3.
+//     HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(dev->hspi, tx_buf, rx_buf, length + 1, LIS3DSHTR_SPI_TIMEOUT);
+
+//     // CS w górę - koniec transmisji (Zegar w Trybie 3 zostaje na HIGH, chip się nie zawiesi!)
+//     HAL_GPIO_WritePin(dev->cs_port, dev->cs_pin, GPIO_PIN_SET);
+
+//     // Przepisujemy dane (pamiętając o przesunięciu o 1 bajt adresu)
+//     if (status == HAL_OK) {
+//         for (uint16_t i = 0; i < length; i++) {
+//             uint8_t *reg_ptr = LISDSHTR_Get_Register_Pointer(&dev->data, reg_addr + i);
+//             if (reg_ptr != NULL) {
+//                 *reg_ptr = rx_buf[i + 1];
+//             }
+//         }
+//     }
+//     return status;
+// }
 
 /* ========================================================================== */
 /* 1. CORE DEVICE MANAGEMENT & INITIALIZATION                                 */
@@ -293,37 +330,58 @@ HAL_StatusTypeDef LIS3DSH_EnableInterrupt(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_
 HAL_StatusTypeDef LIS3DSH_Init(LIS3DSHTR_HandleTypeDef *dev, LIS3DSH_DataRate data_rate) {
     HAL_StatusTypeDef status = HAL_OK;
 
-    //First we chec is there any device online
+    // 1. Sprawdzenie czy układ jest online (WHO_AM_I)
     status = LIS3DSHTR_SPI_ReadRegs(dev, LIS3DSH_REG_WHO_AM_I, 1);
     if(status != HAL_OK || dev->data.WHO_AM_I != LIS3DSH_WHO_AM_I_VAL) {
         return HAL_ERROR;
     }
 
-    uint8_t ctrl_reg4_value = dev->data.CTRL_REGS.CTRL_REG4; // Default value for CTRL_REG4
-    ctrl_reg4_value |= LIS3DSH_CR4_BDU; // Set the BDU bit to enable Block Data Update
+    // 2. Konfiguracja CTRL_REG4 (BDU + Włączenie osi X, Y, Z)
+    uint8_t ctrl_reg4_value = dev->data.CTRL_REGS.CTRL_REG4; 
+    
+    ctrl_reg4_value |= LIS3DSH_CR4_BDU; // Włączenie Block Data Update [cite: 704, 708]
+    
+    /* * KRYTYCZNA POPRAWKA: Jawne włączenie osi X, Y, Z (bity 0, 1, 2).
+     * Wartość 0x07 to binarnie 0000 0111 (ZEN | YEN | XEN).
+     * Bez tego kroku osie pozostają nieaktywne, a sensor zwraca same zera!
+     */
+    ctrl_reg4_value |= 0x07; 
+
     status = LIS3DSHTR_SPI_WriteReg(dev, LIS3DSH_REG_CTRL_REG4, &ctrl_reg4_value, 1);
     if(status != HAL_OK) {
         return HAL_ERROR;
     }
-    dev->data.CTRL_REGS.CTRL_REG4 = ctrl_reg4_value; // Update local shadow copy
+    dev->data.CTRL_REGS.CTRL_REG4 = ctrl_reg4_value; // Aktualizacja lokalnej kopii
 
-    //Set the data rate and power mode
+
+    // 3. Konfiguracja CTRL_REG6 (Auto-increment dla SPI Burst Read/Write)
+    uint8_t ctrl_reg6_value = dev->data.CTRL_REGS.CTRL_REG6; 
+    ctrl_reg6_value |= LIS3DSH_CR6_ADD_INC; // Włączenie autoinkrementacji adresów [cite: 734, 742]
+    
+    status = LIS3DSHTR_SPI_WriteReg(dev, LIS3DSH_REG_CTRL_REG6, &ctrl_reg6_value, 1);
+    if(status != HAL_OK) {
+        return HAL_ERROR;
+    }
+    dev->data.CTRL_REGS.CTRL_REG6 = ctrl_reg6_value; // Aktualizacja lokalnej kopii
+
+
+    // 4. Ustawienie częstotliwości próbkowania (Data Rate) oraz trybu zasilania
     status = LIS3DSH_SetDataRate_And_PowerMode(dev, data_rate);
     if(status != HAL_OK) {
         return HAL_ERROR;
     }
 
-    //Set the full scale to 2G by default
+    // 5. Ustawienie zakresu pomiarowego (domyślnie 2G)
     status = LIS3DSH_SetFullScale(dev, LIS3DSH_FULL_SCALE_2G);
     if(status != HAL_OK) {
         return HAL_ERROR;
     }
 
+    // 6. Konfiguracja przerwań zewnętrznych (INT1)
     status = LIS3DSH_EnableInterrupt(dev, &(LIS3DSH_InterruptConfig_t){.pin = LIS3DSHTR_INT_1, .polarity = 1, .latching = 0});
     if(status != HAL_OK) {
         return HAL_ERROR;
     }
-
 
     return status;
 }
@@ -333,6 +391,7 @@ HAL_StatusTypeDef LIS3DSH_Read_Status_Register(LIS3DSHTR_HandleTypeDef *dev){
     if(status != HAL_OK){
         return status;
     }
+   
     return HAL_OK;
 }
 

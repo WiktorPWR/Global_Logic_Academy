@@ -1,4 +1,4 @@
-#include "LED\LED_interface.h"
+#include "LED/LED_interface.h"
 #include "main.h"
 #include <math.h>
 #include <stdlib.h> // Required for fabsf()
@@ -87,8 +87,9 @@ uint32_t map_value(float x, float in_min, float in_max, uint32_t out_min, uint32
     return (uint32_t)((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
 }
 
+
 // --- AUTOMATIC LED UPDATE BASED ON ACCELEROMETER RAW DATA ---
-HAL_StatusTypeDef LED_Angles_Update(int16_t ax, int16_t ay, int16_t az,TIM_HandleTypeDef *htim) {
+HAL_StatusTypeDef LED_Angles_Update(int16_t ax, int16_t ay, int16_t az, TIM_HandleTypeDef *htim) {
     LIS3DSH_Angles_t angles;
     
     // 1. Calculate current tilt angles in degrees (-90 to 90)
@@ -96,41 +97,41 @@ HAL_StatusTypeDef LED_Angles_Update(int16_t ax, int16_t ay, int16_t az,TIM_Handl
     
     uint32_t max_ccr = htim->Init.Period; // Maximum allowed CCR value (ARR value)
 
-    // 2. Process PITCH axis (Forward / Backward)
+    // 2. Process PITCH axis (Forward / Backward -> GREEN / BLUE)
     if (angles.pitch > 5.0f) {
-        // Tilted forward -> Fade in ORANGE LED (Channel 2)
-        uint32_t ccr_orange = map_value(angles.pitch, 0.0f, 90.0f, 0, max_ccr);
-        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, ccr_orange);
+        // Tilted forward -> Fade in GREEN LED (Channel 1)
+        uint32_t ccr_green = map_value(angles.pitch, 0.0f, 90.0f, 0, max_ccr);
+        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, ccr_green);
         __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_3, 0); // Turn off Blue LED
     } 
     else if (angles.pitch < -5.0f) {
         // Tilted backward -> Fade in BLUE LED (Channel 3)
         uint32_t ccr_blue = map_value(fabsf(angles.pitch), 0.0f, 90.0f, 0, max_ccr);
         __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_3, ccr_blue);
-        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, 0); // Turn off Orange LED
+        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, 0); // Turn off Green LED
     } 
     else {
         // Balanced pitch -> Turn off both pitch LEDs (deadband zone)
-        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, 0);
+        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, 0);
         __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_3, 0);
     }
 
-    // 3. Process ROLL axis (Left / Right)
+    // 3. Process ROLL axis (Left / Right -> ORANGE / RED)
     if (angles.roll > 5.0f) {
         // Tilted right -> Fade in RED LED (Channel 4)
         uint32_t ccr_red = map_value(angles.roll, 0.0f, 90.0f, 0, max_ccr);
         __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_4, ccr_red);
-        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, 0); // Turn off Green LED
+        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, 0); // Turn off Orange LED
     } 
     else if (angles.roll < -5.0f) {
-        // Tilted left -> Fade in GREEN LED (Channel 1)
-        uint32_t ccr_green = map_value(fabsf(angles.roll), 0.0f, 90.0f, 0, max_ccr);
-        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, ccr_green);
+        // Tilted left -> Fade in ORANGE LED (Channel 2)
+        uint32_t ccr_orange = map_value(fabsf(angles.roll), 0.0f, 90.0f, 0, max_ccr);
+        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, ccr_orange);
         __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_4, 0); // Turn off Red LED
     } 
     else {
         // Balanced roll -> Turn off both roll LEDs (deadband zone)
-        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, 0);
+        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, 0);
         __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_4, 0);
     }
 
